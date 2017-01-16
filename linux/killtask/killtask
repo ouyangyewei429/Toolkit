@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Author: ouyangyewei
+# Desc:   Kill the process with the specified task name
+# Usage:  killtask <task_name>
+
+# colour macros
+if [[ -t 1 ]]; then
+  NORMAL="$( echo -e "\e[0m" )"
+
+  HL_RED="$( echo -e "\e[31;1m" )"
+  HL_GREEN="$( echo -e "\e[32;1m" )"
+  HL_BLUE="$( echo -e "\e[34;1m" )"
+fi
+
+_hl_red()    { echo "$HL_RED""$@""$NORMAL";}
+_hl_green()  { echo "$HL_GREEN""$@""$NORMAL";}
+_hl_blue()   { echo "$HL_BLUE""$@""$NORMAL";}
+
+# helper functions
+_trace() {
+  echo $(_hl_blue '  ->') "$@" >&2
+}
+_notice() {
+  echo $(_hl_green '==>') "$@" >&2
+}
+_fatal() {
+  echo $(_hl_red '==> ERROR:') "$@" >&2
+  exit 1
+}
+
+# ---------------------------------------------------------
+
+if [[ $# -ne 1 ]]; then
+  _fatal "Usage: killtask <task_name>"
+fi
+
+# check if linux process about <task_name> exist
+process=`ps -ef | grep $@ | grep -v grep | grep -v $0`
+if [[ -z "$process" ]]; then
+  _notice "Linux process about $@ are not exist."
+  exit 1
+fi
+
+# show all linux process about <task_name>
+_notice "ps -ef | grep $@ | grep -v grep | grep -v $0"
+_notice "-----------------"
+ps -ef | grep $@ | grep -v grep | grep -v $0 | while read process
+do
+   _trace "${process}"
+done
+
+# then kill all linux process about <task_name>
+ps -ef | grep $@ | grep -v grep | grep -v $0 | awk '{print $2}' | xargs kill -9
+_notice "-----------------"
+_notice "Kill All Linux Process About $@ Finished..."
