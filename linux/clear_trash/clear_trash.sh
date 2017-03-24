@@ -56,8 +56,8 @@ function is_contain() {
 }
 
 #####################################################
-# 清理指定的目标目录的历史文件，
-# 不清理safe_dirs指定的目录文件
+# Delete linux history files，
+# do not delete the safe-dirs directory
 #####################################################
 function clear_local_history_file() {
   for target_dir in ${target_dirs[@]}; do
@@ -75,15 +75,15 @@ function clear_local_history_file() {
 
 
 #####################################################
-# 清理/app/lbs/nuomi-da-stat队列的历史文件
+# Delete hdfs history file
 #####################################################
 function clear_hdfs_history_file() {
-  hadoop fs -lsr /app/lbs/nuomi-da-stat | awk -v n_days=${N_DAYS} '
+  hadoop fs -lsr xxx | awk -v n_days=${N_DAYS} '
     BEGIN {
       IFS="\t";
       n_days_ago=strftime("%F", systime()-n_days*24*3600)
     } {
-      if (substr($1,1,1)=="-" && $6<n_days_ago) {print "hadoop fs -Dhadoop.job.ugi=lbs-stat,aresisperfect -rmr", $8}
+      if (substr($1,1,1)=="-" && $6<n_days_ago) {print "hadoop fs -rmr", $8}
     }' | /bin/bash
   echo "Success to clear hdfs history file..."
 }
